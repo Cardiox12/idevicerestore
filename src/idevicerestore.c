@@ -304,10 +304,13 @@ static void irecv_event_cb(const irecv_device_event_t* event, void *userdata)
 				case IRECV_K_RECOVERY_MODE_4:
 					client->mode = MODE_RECOVERY;
 					break;
+				case IRECV_K_KIS_MODE:
+					client->mode = MODE_KIS;
+					break;
 				default:
 					client->mode = MODE_UNKNOWN;
 			}
-			debug("%s: device %016" PRIx64 " (udid: %s) connected in %s mode\n", __func__, client->ecid, (client->udid) ? client->udid : "N/A", client->mode->string);
+			debug("%s: device %016" PRIx64 " (udid: %s) connected in %s mode (0x%x)\n", __func__, client->ecid, (client->udid) ? client->udid : "N/A", client->mode->string, client->mode->index);
 			cond_signal(&client->device_event_cond);
 			mutex_unlock(&client->device_event_mutex);
 		}
@@ -372,7 +375,9 @@ int idevicerestore_start(struct idevicerestore_client_t* client)
 	info("Found device in %s mode\n", client->mode->string);
 	mutex_unlock(&client->device_event_mutex);
 
-	if (client->mode == MODE_WTF) {
+	if (client->mode == MODE_KIS) {
+		
+	} else if (client->mode == MODE_WTF) {
 		unsigned int cpid = 0;
 
 		if (dfu_client_new(client) != 0) {
@@ -2791,3 +2796,5 @@ const char* get_component_name(const char* filename)
 	error("WARNING: Unhandled component '%s'", filename);
 	return NULL;
 }
+
+
